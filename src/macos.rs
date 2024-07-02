@@ -104,7 +104,7 @@ pub fn enumerate_platform(vid: Option<u16>, pid: Option<u16>) -> Vec<UsbDevice> 
                     product_id,
                     description,
                     serial_number,
-                    base_class: DeviceBaseClass::try_from(base_class)?,
+                    base_class: DeviceBaseClass::try_from(base_class).ok(),
                 });
 
                 Ok(())

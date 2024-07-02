@@ -14,8 +14,8 @@ pub struct UsbDevice {
     pub description: Option<String>,
     /// Optional serial number
     pub serial_number: Option<String>,
-    /// Class of device.
-    pub base_class: DeviceBaseClass,
+    /// Class (bDeviceBaseClass) of device.
+    pub base_class: Option<DeviceBaseClass>,
 }
 
 /// See <https://www.usb.org/defined-class-codes>
