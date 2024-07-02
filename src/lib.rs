@@ -61,7 +61,7 @@
 
 #![cfg_attr(feature = "strict", deny(warnings))]
 
-mod common;
+pub mod common;
 pub use common::UsbDevice;
 use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
 use std::{collections::HashSet, thread, time::Duration};
