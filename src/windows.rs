@@ -113,7 +113,7 @@ pub fn enumerate_platform(vid: Option<u16>, pid: Option<u16>) -> Vec<UsbDevice> 
                             product_id,
                             description: Some(description),
                             serial_number,
-                            class,
+                            base_class: class.map(|cls| cls.into()),
                         });
                     }
                 }

@@ -49,6 +49,20 @@ pub enum DeviceBaseClass {
     VendorSpecific = 0xFF,
 }
 
+impl From<String> for DeviceBaseClass {
+    fn from(v: String) -> Self {
+        match v.to_lowercase().as_ref() {
+            "usb" => Self::MassStorage,
+            "bluetooth" => Self::Communication,
+            "hidclass" => Self::HumanInterfaceDevice,
+            "camera" => Self::Video,
+            "biometric" => Self::ContentSecurity,
+            "net" => Self::WirelessController,
+            _ => Self::UseClassCodeFromInterfaceDescriptors,
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 pub struct ParseError;
 
