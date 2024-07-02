@@ -1,4 +1,5 @@
 use crate::common::*;
+use std::convert::TryFrom;
 
 use std::error::Error;
 use udev::Enumerator;
@@ -62,12 +63,17 @@ pub fn enumerate_platform(vid: Option<u16>, pid: Option<u16>) -> Vec<UsbDevice> 
                 .and_then(|s| s.to_str())
                 .map(|s| s.to_string());
 
+            let bclass = device
+                .attribute_value("bDeviceClass")
+                .and_then(|x| x.to_str()?.parse::<u8>().ok());
+
             output.push(UsbDevice {
                 id,
                 vendor_id,
                 product_id,
                 description,
                 serial_number,
+                base_class: bclass.and_then(|bc| DeviceBaseClass::try_from(bc).ok()),
             });
 
             Ok(())
