@@ -9,13 +9,13 @@ use windows_sys::{
     Win32::Devices::DeviceAndDriverInstallation::{
         SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW,
         SetupDiGetDeviceInstanceIdW, SetupDiGetDeviceRegistryPropertyW, DIGCF_ALLCLASSES,
-        DIGCF_PRESENT, SPDRP_CLASS, SPDRP_DEVICEDESC, SPDRP_HARDWAREID, SP_DEVINFO_DATA,
+        DIGCF_PRESENT, SPDRP_CLASS, SPDRP_DEVICEDESC, SPDRP_FRIENDLYNAME, SPDRP_HARDWAREID,
+        SPDRP_MFG, SP_DEVINFO_DATA,
     },
 };
 
 pub fn enumerate_platform(vid: Option<u16>, pid: Option<u16>) -> Vec<UsbDevice> {
     let mut output: Vec<UsbDevice> = Vec::new();
-    // let usb: Vec<u16> = OsStr::new("USB\0").encode_wide().collect();
     let usb = w!("USB\0");
     let dev_info =
         unsafe { SetupDiGetClassDevsW(null(), usb, -1, DIGCF_ALLCLASSES | DIGCF_PRESENT) };
@@ -77,6 +77,42 @@ pub fn enumerate_platform(vid: Option<u16>, pid: Option<u16>) -> Vec<UsbDevice> 
                     class = Some(string_from_buf_u8(buf));
                 }
 
+                // manufactor
+                buf = vec![0; 1000];
+                let mut manufacturer = None;
+                if unsafe {
+                    SetupDiGetDeviceRegistryPropertyW(
+                        dev_info,
+                        &mut dev_info_data,
+                        SPDRP_MFG,
+                        null_mut(),
+                        buf.as_mut_ptr(),
+                        buf.len() as u32,
+                        null_mut(),
+                    )
+                } > 0
+                {
+                    manufacturer = Some(string_from_buf_u8(buf));
+                }
+
+                // friendly name
+                buf = vec![0; 1000];
+                let mut friendly_name = None;
+                if unsafe {
+                    SetupDiGetDeviceRegistryPropertyW(
+                        dev_info,
+                        &mut dev_info_data,
+                        SPDRP_FRIENDLYNAME,
+                        null_mut(),
+                        buf.as_mut_ptr(),
+                        buf.len() as u32,
+                        null_mut(),
+                    )
+                } > 0
+                {
+                    friendly_name = Some(string_from_buf_u8(buf));
+                }
+
                 buf = vec![0; 1000];
 
                 if unsafe {
@@ -111,6 +147,8 @@ pub fn enumerate_platform(vid: Option<u16>, pid: Option<u16>) -> Vec<UsbDevice> 
                             id,
                             vendor_id,
                             product_id,
+                            friendly_name,
+                            manufacturer,
                             description: Some(description),
                             serial_number,
                             base_class: class.map(|cls| cls.into()),

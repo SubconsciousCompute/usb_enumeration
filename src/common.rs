@@ -10,12 +10,16 @@ pub struct UsbDevice {
     pub vendor_id: u16,
     /// Product ID
     pub product_id: u16,
+    /// Friendly name.
+    pub friendly_name: Option<String>,
     /// Optional device description
     pub description: Option<String>,
     /// Optional serial number
     pub serial_number: Option<String>,
     /// Class (bDeviceBaseClass) of device.
     pub base_class: Option<DeviceBaseClass>,
+    /// Manufacturer
+    pub manufacturer: Option<String>,
 }
 
 /// See <https://www.usb.org/defined-class-codes>
