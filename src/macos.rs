@@ -2,8 +2,7 @@ use crate::common::*;
 use core_foundation::{base::*, dictionary::*, number::*, string::*};
 use io_kit_sys::{types::*, usb::lib::*, *};
 use mach::kern_return::*;
-use std::{error::Error, mem::MaybeUninit};
-use std::convert::TryFrom;
+use std::{convert::TryFrom, error::Error, mem::MaybeUninit};
 
 pub fn enumerate_platform(vid: Option<u16>, pid: Option<u16>) -> Vec<UsbDevice> {
     let mut output = Vec::new();
@@ -91,12 +90,27 @@ pub fn enumerate_platform(vid: Option<u16>, pid: Option<u16>) -> Vec<UsbDevice> 
                     .map(|s| s.to_string());
 
                 let key = CFString::from_static_string("bDeviceClass");
-                let base_class = properties
+                let base_class = DeviceBaseClass::try_from(
+                    properties
+                        .find(&key)
+                        .and_then(|value_ref| value_ref.downcast::<CFNumber>())
+                        .ok_or(ParseError)?
+                        .to_i32()
+                        .ok_or(ParseError)? as u8,
+                )
+                .ok();
+
+                let key = CFString::from_static_string("USB Product Name");
+                let friendly_name = properties
                     .find(&key)
-                    .and_then(|value_ref| value_ref.downcast::<CFNumber>())
-                    .ok_or(ParseError)?
-                    .to_i32()
-                    .ok_or(ParseError)? as u8;
+                    .and_then(|value_ref| value_ref.downcast::<CFString>())
+                    .map(|s| s.to_string());
+
+                let key = CFString::from_static_string("USB Vendor Name");
+                let manufacturer = properties
+                    .find(&key)
+                    .and_then(|value_ref| value_ref.downcast::<CFString>())
+                    .map(|s| s.to_string());
 
                 output.push(UsbDevice {
                     id: id.to_string(),
@@ -104,7 +118,10 @@ pub fn enumerate_platform(vid: Option<u16>, pid: Option<u16>) -> Vec<UsbDevice> 
                     product_id,
                     description,
                     serial_number,
-                    base_class: DeviceBaseClass::try_from(base_class).ok(),
+                    base_class,
+                    class: None,
+                    friendly_name,
+                    manufacturer,
                 });
 
                 Ok(())

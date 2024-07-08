@@ -4,7 +4,7 @@ use std::{
     mem::{size_of, zeroed},
     ptr::{null, null_mut},
 };
-use windows_sys::{
+use windows::{
     w,
     Win32::Devices::DeviceAndDriverInstallation::{
         SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW,
