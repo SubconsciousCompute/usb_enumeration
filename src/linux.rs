@@ -67,6 +67,19 @@ pub fn enumerate_platform(vid: Option<u16>, pid: Option<u16>) -> Vec<UsbDevice> 
                 .attribute_value("bDeviceClass")
                 .and_then(|x| x.to_str()?.parse::<u8>().ok());
 
+            let friendly_name = device
+                .property_value("ID_MODEL_FROM_DATABASE")
+                .and_then(|s| s.to_str())
+                .map(|x| x.to_string());
+            let manufacturer = device
+                .property_value("ID_VENDOR_FROM_DATABASE")
+                .and_then(|s| s.to_str())
+                .map(|x| x.to_string());
+            let class = device
+                .property_value("ID_PCI_CLASS_FROM_DATABASE")
+                .and_then(|s| s.to_str())
+                .map(|x| x.to_string());
+
             output.push(UsbDevice {
                 id,
                 vendor_id,
@@ -74,6 +87,9 @@ pub fn enumerate_platform(vid: Option<u16>, pid: Option<u16>) -> Vec<UsbDevice> 
                 description,
                 serial_number,
                 base_class: bclass.and_then(|bc| DeviceBaseClass::try_from(bc).ok()),
+                class,
+                friendly_name,
+                manufacturer,
             });
 
             Ok(())
