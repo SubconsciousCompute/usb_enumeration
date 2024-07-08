@@ -18,6 +18,8 @@ pub struct UsbDevice {
     pub serial_number: Option<String>,
     /// Class (bDeviceBaseClass) of device.
     pub base_class: Option<DeviceBaseClass>,
+    /// Class as string
+    pub class: Option<String>,
     /// Manufacturer
     pub manufacturer: Option<String>,
 }
@@ -25,6 +27,7 @@ pub struct UsbDevice {
 /// See <https://www.usb.org/defined-class-codes>
 #[repr(u8)]
 #[derive(Hash, Eq, Debug, Clone, PartialEq, TryFromPrimitive)]
+#[allow(dead_code)]
 pub enum DeviceBaseClass {
     UseClassCodeFromInterfaceDescriptors = 0x00,
     Audio = 0x01,
